@@ -1,0 +1,612 @@
+openapi: 3.0.3
+info:
+  title: PurrMatch Backend API
+  version: 1.0.0
+  description: >
+    REST API for the PurrMatch cat matchmaking platform (Phase 02).
+    Provides authentication, role-based access control, swipe/match logic,
+    transactional meeting scheduling, and admin venue management.
+servers:
+  - url: http://localhost:4000
+    description: Local development server
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    UserPublic:
+      type: object
+      properties:
+        user_id:
+          type: integer
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          enum: [owner, breeder, shelter, admin]
+        full_name:
+          type: string
+        phone:
+          type: string
+      required: [user_id, email, role, full_name]
+
+    AuthRegisterRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+        full_name:
+          type: string
+        phone:
+          type: string
+        role:
+          type: string
+          description: Optional; defaults to owner
+          enum: [owner, breeder, shelter, admin]
+      required: [email, password, full_name]
+
+    AuthLoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+      required: [email, password]
+
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        user:
+          $ref: "#/components/schemas/UserPublic"
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+
+    CatFeedItem:
+      type: object
+      properties:
+        cat_id:
+          type: integer
+        name:
+          type: string
+        breed:
+          type: string
+        age:
+          type: integer
+        bio:
+          type: string
+        photo_url:
+          type: string
+        looking_for:
+          type: string
+          enum: [playmate, breeding, adoption]
+
+    SwipeRequest:
+      type: object
+      properties:
+        swiper_cat_id:
+          type: integer
+        swiped_cat_id:
+          type: integer
+        direction:
+          type: string
+          enum: [left, right]
+      required: [swiper_cat_id, swiped_cat_id, direction]
+
+    Swipe:
+      type: object
+      properties:
+        swipe_id:
+          type: integer
+        swiper_cat_id:
+          type: integer
+        swiped_cat_id:
+          type: integer
+        direction:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    Match:
+      type: object
+      properties:
+        match_id:
+          type: integer
+        matched_at:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [active, cancelled, meeting_scheduled]
+        cat1_id:
+          type: integer
+        cat1_name:
+          type: string
+        cat2_id:
+          type: integer
+        cat2_name:
+          type: string
+
+    MeetingCreateRequest:
+      type: object
+      properties:
+        match_id:
+          type: integer
+        venue_id:
+          type: integer
+        scheduled_time:
+          type: string
+          format: date-time
+        duration_hours:
+          type: integer
+        slots_reserved:
+          type: integer
+      required: [match_id, venue_id, scheduled_time, duration_hours, slots_reserved]
+
+    Meeting:
+      type: object
+      properties:
+        meeting_id:
+          type: integer
+        match_id:
+          type: integer
+        venue_id:
+          type: integer
+        scheduled_time:
+          type: string
+          format: date-time
+        duration_hours:
+          type: integer
+        total_cost:
+          type: number
+          format: float
+        status:
+          type: string
+          enum: [pending, confirmed, completed, cancelled]
+
+    Booking:
+      type: object
+      properties:
+        booking_id:
+          type: integer
+        venue_id:
+          type: integer
+        meeting_id:
+          type: integer
+        time_slot:
+          type: string
+          format: date-time
+        slots_reserved:
+          type: integer
+        status:
+          type: string
+          enum: [reserved, confirmed, cancelled]
+
+    Venue:
+      type: object
+      properties:
+        venue_id:
+          type: integer
+        name:
+          type: string
+        address:
+          type: string
+        city:
+          type: string
+        capacity:
+          type: integer
+        hourly_rate:
+          type: number
+        contact_email:
+          type: string
+        contact_phone:
+          type: string
+
+    VenueCreateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        address:
+          type: string
+        city:
+          type: string
+        capacity:
+          type: integer
+        hourly_rate:
+          type: number
+        contact_email:
+          type: string
+        contact_phone:
+          type: string
+      required: [name, address, city, capacity, hourly_rate]
+
+security:
+  - bearerAuth: []
+
+paths:
+  /api/health:
+    get:
+      summary: Health check
+      tags: [System]
+      security: []
+      responses:
+        "200":
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  service:
+                    type: string
+
+  /api/v1/auth/register:
+    post:
+      summary: Register a new user
+      tags: [Auth]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuthRegisterRequest"
+      responses:
+        "201":
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Email already registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/v1/auth/login:
+    post:
+      summary: Login and receive JWT
+      tags: [Auth]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuthLoginRequest"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          description: Missing credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/v1/cats/feed:
+    get:
+      summary: Get swipeable cats feed
+      tags: [Cats]
+      parameters:
+        - name: swiper_cat_id
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of cats to swipe on
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cats:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/CatFeedItem"
+        "400":
+          description: Missing swiper_cat_id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Missing/invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/v1/cats/swipe:
+    post:
+      summary: Record a swipe between cats
+      tags: [Cats]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SwipeRequest"
+      responses:
+        "201":
+          description: Swipe recorded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  swipe:
+                    $ref: "#/components/schemas/Swipe"
+        "400":
+          description: Invalid payload or constraint violation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Missing/invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Swipe already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/v1/cats/matches:
+    get:
+      summary: List matches for a cat
+      tags: [Cats]
+      parameters:
+        - name: cat_id
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of matches
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  matches:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Match"
+        "400":
+          description: Missing cat_id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Missing/invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/v1/meetings:
+    post:
+      summary: Schedule a meeting and venue booking (transactional)
+      description: >
+        Creates a meeting and corresponding venue booking inside a single
+        database transaction. If capacity validation or any insert fails,
+        the transaction is rolled back and no rows are persisted.
+      tags: [Meetings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MeetingCreateRequest"
+      responses:
+        "201":
+          description: Meeting and booking created, transaction committed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  meeting:
+                    $ref: "#/components/schemas/Meeting"
+                  booking:
+                    $ref: "#/components/schemas/Booking"
+                  transaction:
+                    type: string
+                    enum: [committed]
+        "400":
+          description: Validation error or capacity trigger exception (rolled back)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  transaction:
+                    type: string
+                    enum: [rolled_back]
+        "401":
+          description: Missing/invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Unexpected server error (rolled back)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  transaction:
+                    type: string
+                    enum: [rolled_back]
+
+  /api/v1/meetings/{id}/cancel:
+    post:
+      summary: Cancel a meeting and its booking (transactional)
+      description: >
+        Updates meeting and booking statuses inside a single transaction.
+        If any statement fails, the transaction is rolled back.
+      tags: [Meetings]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Meeting cancelled, transaction committed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  transaction:
+                    type: string
+                    enum: [committed]
+        "400":
+          description: Invalid meeting id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Missing/invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Meeting not found (rolled back)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  transaction:
+                    type: string
+                    enum: [rolled_back]
+
+  /api/v1/admin/venues:
+    get:
+      summary: List all venues (admin only)
+      tags: [Admin]
+      responses:
+        "200":
+          description: List of venues
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  venues:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Venue"
+        "401":
+          description: Missing/invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Not an admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    post:
+      summary: Create a new venue (admin only)
+      tags: [Admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VenueCreateRequest"
+      responses:
+        "201":
+          description: Venue created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  venue:
+                    $ref: "#/components/schemas/Venue"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Missing/invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Not an admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
