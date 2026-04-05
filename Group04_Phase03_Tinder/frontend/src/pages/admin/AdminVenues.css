@@ -1,0 +1,114 @@
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Create form card */
+.venue-form-card {
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid rgba(255, 107, 157, 0.15);
+}
+
+.venue-form-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 1.25rem;
+}
+
+.form-row-3 {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 1rem;
+}
+
+/* Table cells */
+.venue-name-cell {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.venue-rate {
+  color: var(--accent-green);
+  font-weight: 600;
+}
+
+.venue-contact {
+  font-size: 0.85rem;
+}
+
+.capacity-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  padding: 0.2rem 0.6rem;
+  background: rgba(168, 85, 247, 0.12);
+  color: var(--accent-purple);
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+/* Mobile cards hidden on desktop */
+.venues-cards-mobile {
+  display: none;
+}
+
+.venue-mobile-card {
+  padding: 1.25rem 1.5rem;
+}
+
+.venue-mobile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.venue-mobile-header h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.venue-mobile-city {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.25rem;
+}
+
+.venue-mobile-rate {
+  font-size: 0.9rem;
+  color: var(--accent-green);
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.venue-mobile-contact {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+@media (max-width: 768px) {
+  .venues-table-desktop {
+    display: none;
+  }
+
+  .venues-cards-mobile {
+    display: grid;
+  }
+
+  .form-row-3 {
+    grid-template-columns: 1fr;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}

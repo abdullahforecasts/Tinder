@@ -1,0 +1,98 @@
+.my-cats-header {
+  margin-bottom: 1.25rem;
+}
+
+.my-cats-layout {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 1rem;
+  align-items: start;
+}
+
+.my-cats-form-card,
+.my-cats-list-card {
+  padding: 1.25rem;
+}
+
+.my-cats-section-title {
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.my-cats-hint {
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+  margin-bottom: 1rem;
+}
+
+.my-cats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.my-cats-textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.my-cats-checkbox-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.my-cats-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.my-cats-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.my-cat-item {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.75rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.my-cat-photo {
+  width: 72px;
+  height: 72px;
+  border-radius: 10px;
+  object-fit: cover;
+}
+
+.my-cat-name {
+  font-size: 1rem;
+  margin-bottom: 0.15rem;
+}
+
+.my-cat-meta {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+@media (max-width: 1100px) {
+  .my-cats-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .my-cats-grid {
+    grid-template-columns: 1fr;
+  }
+}

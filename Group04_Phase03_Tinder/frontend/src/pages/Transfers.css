@@ -1,0 +1,125 @@
+.transfer-header {
+  margin-bottom: 1rem;
+}
+
+.transfer-layout {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 1rem;
+  align-items: start;
+}
+
+.transfer-form-card,
+.transfer-open-card,
+.transfer-history-card,
+.transfer-directory-card {
+  padding: 1.25rem;
+}
+
+.transfer-section-title {
+  margin-bottom: 0.45rem;
+  font-size: 1.05rem;
+}
+
+.transfer-hint {
+  color: var(--text-secondary);
+  font-size: 0.86rem;
+  margin-bottom: 1rem;
+}
+
+.transfer-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.transfer-note {
+  min-height: 90px;
+  resize: vertical;
+}
+
+.transfer-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.transfer-item {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.02);
+  padding: 0.8rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.transfer-item h3,
+.transfer-item h4 {
+  margin-bottom: 0.2rem;
+  font-size: 0.95rem;
+}
+
+.transfer-item-small {
+  display: block;
+}
+
+.transfer-item-main {
+  min-width: 0;
+}
+
+.transfer-meta {
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+}
+
+.transfer-note-preview {
+  color: var(--text-primary);
+  font-size: 0.84rem;
+  margin-top: 0.35rem;
+}
+
+.transfer-actions {
+  display: flex;
+  align-items: center;
+}
+
+.transfer-history-card,
+.transfer-directory-card {
+  grid-column: span 1;
+}
+
+.directory-columns {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.directory-columns h4 {
+  margin-bottom: 0.35rem;
+  font-size: 0.92rem;
+}
+
+@media (max-width: 1100px) {
+  .transfer-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .transfer-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .directory-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .transfer-item {
+    display: block;
+  }
+
+  .transfer-actions {
+    margin-top: 0.7rem;
+  }
+}

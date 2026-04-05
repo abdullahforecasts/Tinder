@@ -1,0 +1,21 @@
+{
+  "name": "purrmatch-backend",
+  "version": "1.0.0",
+  "description": "Phase 02 backend API for PurrMatch (cat matchmaking with venues and meetings)",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "NODE_ENV=development node src/server.js",
+    "start": "NODE_ENV=production node src/server.js"
+  },
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "cors": "^2.8.6",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
+    "helmet": "^8.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
+    "pg": "^8.13.1",
+    "pg-format": "^1.0.4"
+  }
+}
